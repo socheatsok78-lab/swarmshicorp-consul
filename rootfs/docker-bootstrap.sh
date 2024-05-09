@@ -69,11 +69,31 @@ if [[ -n "$CONSUL_DNS_RECURSOR" ]]; then
     docker_bootstrap_set_arg "-recursor=${CONSUL_DNS_RECURSOR}"
 fi
 
-# Extra Options
-if [[ -z "${CONSUL_LOG_LEVEL}" ]]; then
-    CONSUL_LOG_LEVEL="INFO"
+# Node Options
+if [[ -z "${CONSUL_NODE_NAME}" ]]; then
+    CONSUL_NODE_NAME=$(hostname -s)
 fi
+docker_bootstrap_set_arg "-node=${CONSUL_NODE_NAME}"
+
+# Log Options
+if [[ -n "${CONSUL_LOG_FILE}" ]]; then
+    docker_bootstrap_set_arg "-log-file=${CONSUL_LOG_FILE}"
+
+    CONSUL_LOG_ROTATE_BYTES=${CONSUL_LOG_ROTATE_BYTES:-"15000000"}
+    docker_bootstrap_set_arg "-log-rotate-bytes=${CONSUL_LOG_ROTATE_BYTES}"
+
+    CONSUL_LOG_ROTATE_DURATION=${CONSUL_LOG_ROTATE_DURATION:-"24h"}
+    docker_bootstrap_set_arg "-log-rotate-duration=${CONSUL_LOG_ROTATE_DURATION}"
+
+    CONSUL_LOG_ROTATE_MAX_FILES=${CONSUL_LOG_ROTATE_MAX_FILES:-"3"}
+    docker_bootstrap_set_arg "-log-rotate-max-files=${CONSUL_LOG_ROTATE_MAX_FILES}"
+fi
+
+CONSUL_LOG_LEVEL=${CONSUL_LOG_LEVEL:-"INFO"}
 docker_bootstrap_set_arg "-log-level=${CONSUL_LOG_LEVEL}"
+
+CONSUL_LOG_JSON=${CONSUL_LOG_JSON:-"false"}
+docker_bootstrap_set_arg "-log-json=${CONSUL_LOG_JSON}"
 
 # run the original entrypoint
 if [ "$1" = 'agent' ]; then
