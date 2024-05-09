@@ -25,7 +25,7 @@ fi
 if [[ -z "${CONSUL_CLIENT}" ]] && [[ -z "$CONSUL_CLIENT_INTERFACE" ]]; then
     if [[ -n "${CONSUL_CLIENT_ADDRESS}" ]]; then
         CONSUL_CLIENT="-client=$CONSUL_CLIENT_ADDRESS"
-        echo "==> The CONSUL_CLIENT_INTERFACE is not set, using address '$CONSUL_CLIENT_ADDRESS' for bind option..."
+        echo "==> The CONSUL_CLIENT_INTERFACE is not set, using address '$CONSUL_CLIENT_ADDRESS' for client option..."
     fi
 fi
 
