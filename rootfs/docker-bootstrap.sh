@@ -62,6 +62,17 @@ if [[ -z "$CONSUL_ADVERTISE_WAN" ]]; then
     fi
 fi
 
+# Datacenter Options
+# 
+# This flag controls the datacenter in which the agent is running.
+# If not provided, it defaults to "dc1". Consul has first-class support for multiple datacenters,
+# but it relies on proper configuration.
+# 
+# Nodes in the same datacenter should be on a single LAN.
+if [[ -n "${CONSUL_DATACENTER}" ]]; then
+    docker_bootstrap_set_arg "-datacenter=${CONSUL_DATACENTER}"
+fi
+
 # DNS and Domain Options
 # 
 # The DNS port to listen on. This overrides the default port 8600.
