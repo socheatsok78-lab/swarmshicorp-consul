@@ -1,6 +1,7 @@
 services:
   consul:
     image: swarmshicorp-consul:local
+    command: agent -server -ui -bootstrap-expect=1
     environment:
       - CONSUL_BIND_ADDRESS=0.0.0.0
       - CONSUL_CLIENT_ADDRESS=0.0.0.0

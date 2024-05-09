@@ -5,4 +5,4 @@ ADD rootfs /
 RUN chmod +x /docker-bootstrap.sh
 VOLUME [ "/consul/certs" ]
 ENTRYPOINT [ "/docker-bootstrap.sh" ]
-CMD [ "agent", "-server", "-ui", "-bootstrap-expect=1" ]
+CMD ["agent", "-dev", "-client", "0.0.0.0"]
