@@ -1,5 +1,5 @@
 services:
-  consul:
+  server:
     image: swarmshicorp-consul:local
     command: agent -server -ui -bootstrap-expect=1
     environment:
