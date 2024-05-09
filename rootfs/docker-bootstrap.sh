@@ -172,6 +172,6 @@ docker_bootstrap_set_arg "-log-json=${CONSUL_LOG_JSON}"
 
 # run the original entrypoint
 if [ "$1" = 'agent' ]; then
-    set -- "$@" $CONSUL_BIND $CONSUL_CLIENT $CONSUL_ADVERTISE $CONSUL_ADVERTISE_WAN $DOCKER_BOOTSTRAP_ARGS
+    set -- $CONSUL_BIND $CONSUL_CLIENT $CONSUL_ADVERTISE $CONSUL_ADVERTISE_WAN $DOCKER_BOOTSTRAP_ARGS "$@"
 fi
 exec docker-entrypoint.sh "${@}"
