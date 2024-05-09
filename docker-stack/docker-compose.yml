@@ -1,12 +1,6 @@
 services:
   consul:
-    image: hashicorp/consul:latest
-    command:
-      - agent
-      - -server
-      - -ui
-      - -log-level=trace
-      - -bootstrap-expect=1
+    image: swarmshicorp-consul:local
     environment:
       - CONSUL_BIND_ADDRESS=0.0.0.0
       - CONSUL_CLIENT_ADDRESS=0.0.0.0
@@ -18,17 +12,8 @@ services:
     networks:
       - consul-net
       - consul-host
-    configs:
-      - source: docker-bootstrap.sh
-        target: /docker-bootstrap.sh
-        mode: 0755
-    entrypoint: ["/docker-bootstrap.sh"]
     volumes:
       - consul-data:/consul/data
-
-configs:
-  docker-bootstrap.sh:
-    file: ../rootfs/docker-bootstrap.sh
 
 volumes:
   consul-data:

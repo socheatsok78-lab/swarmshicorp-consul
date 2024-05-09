@@ -19,13 +19,13 @@ docker_bootstrap_set_arg() {
 if [[ -z "${CONSUL_BIND}" ]] && [[ -z "$CONSUL_BIND_INTERFACE" ]]; then
     if [[ -n "${CONSUL_BIND_ADDRESS}" ]]; then
         CONSUL_BIND="-bind=$CONSUL_BIND_ADDRESS"
-        echo "==> Using address '$CONSUL_CLIENT_ADDRESS for bind option..."
+        echo "==> The CONSUL_BIND_INTERFACE is not set, using address '$CONSUL_BIND_ADDRESS' for bind option..."
     fi
 fi
 if [[ -z "${CONSUL_CLIENT}" ]] && [[ -z "$CONSUL_CLIENT_INTERFACE" ]]; then
     if [[ -n "${CONSUL_CLIENT_ADDRESS}" ]]; then
         CONSUL_CLIENT="-client=$CONSUL_CLIENT_ADDRESS"
-        echo "==> Using address '$CONSUL_CLIENT_ADDRESS for client option..."
+        echo "==> The CONSUL_CLIENT_INTERFACE is not set, using address '$CONSUL_CLIENT_ADDRESS' for bind option..."
     fi
 fi
 
@@ -68,6 +68,12 @@ fi
 if [[ -n "$CONSUL_DNS_RECURSOR" ]]; then
     docker_bootstrap_set_arg "-recursor=${CONSUL_DNS_RECURSOR}"
 fi
+
+# Extra Options
+if [[ -z "${CONSUL_LOG_LEVEL}" ]]; then
+    CONSUL_LOG_LEVEL="INFO"
+fi
+docker_bootstrap_set_arg "-log-level=${CONSUL_LOG_LEVEL}"
 
 # run the original entrypoint
 if [ "$1" = 'agent' ]; then
