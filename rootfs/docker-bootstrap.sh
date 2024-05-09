@@ -73,6 +73,74 @@ if [[ -n "${CONSUL_DATACENTER}" ]]; then
     docker_bootstrap_set_arg "-datacenter=${CONSUL_DATACENTER}"
 fi
 
+# Node Options
+# 
+# The name of this node in the cluster. This must be unique within the cluster.
+# By default this is the hostname of the machine.
+# The node name cannot contain whitespace or quotation marks.
+# To query the node from DNS, the name must only contain alphanumeric characters and hyphens (-).
+if [[ -z "${CONSUL_NODE_NAME}" ]]; then
+    CONSUL_NODE_NAME=$(hostname -s)
+fi
+docker_bootstrap_set_arg "-node=${CONSUL_NODE_NAME}"
+
+# Bootstrap Options
+# 
+# This flag provides the number of expected servers in the datacenter.
+# Either this value should not be provided or the value must agree with other servers in the cluster.
+# When provided, Consul waits until the specified number of servers are available and then bootstraps the cluster.
+# This allows an initial leader to be elected automatically. 
+if [[ -n "$CONSUL_BOOTSTRAP_EXPECT" ]]; then
+    docker_bootstrap_set_arg "-bootstrap-expect=${CONSUL_BOOTSTRAP_EXPECT}"
+fi
+# Address of another agent to join upon starting up. Joining is retried until success. Once the agent joins successfully as a member,
+# it will not attempt to join again. After joining, the agent solely maintains its membership via gossip.
+# This option can be specified multiple times to specify multiple agents to join. By default, the agent won't join any nodes when it starts up.
+# The value can contain IPv4, IPv6, or DNS addresses. Literal IPv6 addresses must be enclosed in square brackets.
+# If multiple values are given, they are tried and retried in the order listed until the first succeeds.
+if [[ -n "$CONSUL_RETRY_JOIN" ]]; then
+    docker_bootstrap_set_arg "-retry-join=${CONSUL_RETRY_JOIN}"
+
+    # Time to wait between join attempts. Defaults to 30s.
+    if [[ -n "$CONSUL_RETRY_INTERVAL" ]]; then
+        docker_bootstrap_set_arg "-retry-interval=${CONSUL_RETRY_INTERVAL}"
+    fi
+    # The maximum number of join attempts if using -retry-join before exiting with return code 1.
+    # By default, this is set to 0 which is interpreted as infinite retries.
+    if [[ -n "$CONSUL_RETRY_MAX" ]]; then
+        docker_bootstrap_set_arg "-retry-max=${CONSUL_RETRY_MAX}"
+    fi
+fi
+# ddress of another WAN agent to join upon starting up. WAN joining is retried until success.
+# This can be specified multiple times to specify multiple WAN agents to join. If multiple values are given,
+# they are tried and retried in the order listed until the first succeeds.
+# By default, the agent won't WAN join any nodes when it starts up.
+if [[ -n "$CONSUL_RETRY_JOIN_WAN" ]]; then
+    docker_bootstrap_set_arg "-retry-join-wan=${CONSUL_RETRY_JOIN_WAN}"
+
+    # Time to wait between -retry-join-wan attempts. Defaults to 30s.
+    if [[ -n "$CONSUL_RETRY_INTERVAL_WAN" ]]; then
+        docker_bootstrap_set_arg "-retry-interval-wan=${CONSUL_RETRY_INTERVAL_WAN}"
+    fi
+    # The maximum number of -retry-join-wan attempts to be made before exiting with return code 1.
+    # By default, this is set to 0 which is interpreted as infinite retries.
+    if [[ -n "$CONSUL_RETRY_MAX_WAN" ]]; then
+        docker_bootstrap_set_arg "-retry-max-wan=${CONSUL_RETRY_MAX_WAN}"
+    fi
+fi
+# Similar to -retry-join-wan but allows retrying discovery of fallback addresses for
+# the mesh gateways in the primary datacenter if the first attempt fails.
+# This is useful for cases where we know the address will become available eventually.
+if [[ -n "$CONSUL_PRIMARY_GATEWAY" ]]; then
+    docker_bootstrap_set_arg "-primary-gateway=${CONSUL_PRIMARY_GATEWAY}"
+fi
+# When provided, Consul will ignore a previous leave and attempt to rejoin the cluster when starting.
+# By default, Consul treats leave as a permanent intent and does not attempt to join the cluster again when starting.
+# This flag allows the previous state to be used to rejoin the cluster.
+if [[ -n "$CONSUL_REJOIN" ]]; then
+    docker_bootstrap_set_arg "-rejoin"
+fi
+
 # DNS and Domain Options
 # 
 # The DNS port to listen on. This overrides the default port 8600.
@@ -90,17 +158,6 @@ fi
 if [[ -n "$CONSUL_DNS_ALT_DOMAIN" ]]; then
     docker_bootstrap_set_arg "-alt-domain=${CONSUL_DNS_ALT_DOMAIN}"
 fi
-
-# Node Options
-# 
-# The name of this node in the cluster. This must be unique within the cluster.
-# By default this is the hostname of the machine.
-# The node name cannot contain whitespace or quotation marks.
-# To query the node from DNS, the name must only contain alphanumeric characters and hyphens (-).
-if [[ -z "${CONSUL_NODE_NAME}" ]]; then
-    CONSUL_NODE_NAME=$(hostname -s)
-fi
-docker_bootstrap_set_arg "-node=${CONSUL_NODE_NAME}"
 
 # Log Options
 # 
