@@ -1,19 +1,37 @@
-name: "Build"
+name: Matrix Build
 
 on:
-  workflow_call:
-    inputs:
-      version:
-        type: string
-        required: true
-      tag-pattern:
-        type: string
-        required: false
-        default: "type=semver,pattern={{version}}"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    types: [opened, synchronize, reopened]
+  # schedule:
+  #   # Runs at 15:00, only on Saturday.
+  #   - cron:  '0 15 * * SAT'
+
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.ref }}
+#   cancel-in-progress: true
 
 jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Generate build matrix
+        id: releases
+        run: echo "matrix=$(jq -cr '' matrix.json)" >> "$GITHUB_OUTPUT"
+    outputs:
+      matrix: ${{ steps.releases.outputs.matrix }}
+
   build:
     runs-on: ubuntu-latest
+    needs: generate
+    strategy:
+      matrix: ${{fromJson(needs.generate.outputs.matrix)}}
     permissions:
       contents: read
       packages: write
@@ -40,7 +58,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           flavor: latest=false
-          tags: ${{ inputs.tag-pattern }},value=${{ inputs.version }}
+          tags: type=raw,value=${{ matrix.version }}
 
       - name: Generate GitHub metadata
         id: github-meta
@@ -49,7 +67,7 @@ jobs:
       - name: Build and push
         uses: docker/bake-action@v4
         env:
-          VAULT_VERSION: ${{ inputs.version }}
+          VAULT_VERSION: ${{ matrix.version }}
         with:
           push: ${{ github.event_name != 'pull_request' }}
           files: |
