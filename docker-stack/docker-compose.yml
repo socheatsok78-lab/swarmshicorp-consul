@@ -1,6 +1,6 @@
 services:
   server:
-    image: swarmshicorp-consul:local
+    image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
     command: agent -server -ui -bootstrap-expect=1
     environment:
       - CONSUL_BIND_ADDRESS=0.0.0.0
