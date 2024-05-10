@@ -1,8 +1,12 @@
 services:
   server:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
-    command: agent -server -ui -bootstrap-expect=1
+    command: agent -server -ui
     environment:
+      # Cluster configuration
+      - CONSUL_BOOTSTRAP_EXPECT=1
+      - CONSUL_RETRY_JOIN=tasks.server
+      # Bind and advertise address
       - CONSUL_BIND_ADDRESS=0.0.0.0
       - CONSUL_CLIENT_ADDRESS=0.0.0.0
       - CONSUL_ADVERTISE_INTERFACE=eth0
@@ -15,6 +19,28 @@ services:
       - consul-host
     volumes:
       - consul-data:/consul/data
+    deploy:
+      mode: replicated
+      replicas: 3
+      placement:
+        max_replicas_per_node: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      update_config:
+        order: stop-first
+        monitor: 120s
+        parallelism: 1
+        failure_action: pause
+        max_failure_ratio: 0.1
+      rollback_config:
+        order: stop-first
+        parallelism: 1
+        monitor: 120s
+        failure_action: pause
+        max_failure_ratio: 0.1
 
 volumes:
   consul-data:
