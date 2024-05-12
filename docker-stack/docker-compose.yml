@@ -3,27 +3,34 @@ services:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
     command: agent -server -ui
     environment:
-      # Cluster configuration
-      - CONSUL_BOOTSTRAP_EXPECT=1
-      - CONSUL_RETRY_JOIN=tasks.server
-      # Bind and advertise address
-      - CONSUL_BIND_ADDRESS=0.0.0.0
-      - CONSUL_CLIENT_ADDRESS=0.0.0.0
+      # Cluster advertise address
       - CONSUL_ADVERTISE_INTERFACE=eth0
-      - CONSUL_ADVERTISE_WAN_INTERFACE=eth2
-    hostname: consul-{{.Node.ID}}.svc.cluster.local
+      # ===============================
+      # DO NOT CHANGE THIS VALUES BELOW
+      # ===============================
+      # Cluster bootstrap configuration
+      - CONSUL_BOOTSTRAP_EXPECT=3
+      - CONSUL_NODE_NAME=consul-{{.Task.Slot}}
+      - CONSUL_RETRY_JOIN=consul-1.svc.cluster.local
+      # Internal Docker Swarm configurations
+      - CONSUL_NODE_META_SERVICE_ID={{.Service.ID}}
+      - CONSUL_NODE_META_SERVICE_NAME={{.Service.Name}}
+      - CONSUL_NODE_META_NODE_ID={{.Node.ID}}
+      - CONSUL_NODE_META_NODE_HOSTNAME={{.Node.Hostname}}
+      - CONSUL_NODE_META_TASK_ID={{.Task.ID}}
+      - CONSUL_NODE_META_TASK_NAME={{.Task.Name}}
+      - CONSUL_NODE_META_TASK_SLOT={{.Task.Slot}}
+      - CONSUL_NODE_META_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
+    hostname: consul-{{.Task.Slot}}.svc.cluster.local
     ports:
       - "8500:8500"
     networks:
-      - consul-net
-      - consul-host
+      consul-net:
     volumes:
       - consul-data:/consul/data
     deploy:
       mode: replicated
       replicas: 3
-      placement:
-        max_replicas_per_node: 1
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -48,6 +55,3 @@ volumes:
 networks:
   consul-net:
     driver: overlay
-  consul-host:
-    name: host
-    external: true
