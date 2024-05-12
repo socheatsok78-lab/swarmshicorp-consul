@@ -1,6 +1,6 @@
 ARG CONSUL_VERSION=latest
 FROM hashicorp/consul:${CONSUL_VERSION}
-RUN apk add --no-cache bash ca-certificates
+RUN apk add --no-cache bash ca-certificates uuidgen
 ADD rootfs /
 RUN chmod +x /docker-bootstrap.sh
 VOLUME [ "/consul/certs" ]
