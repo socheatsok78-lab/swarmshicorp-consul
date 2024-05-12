@@ -25,6 +25,9 @@ docker_bootstrap_set_node_meta() {
 #
 # The address to which Consul will bind client interfaces, including the HTTP and DNS servers.
 if [[ -z "${CONSUL_BIND}" ]] && [[ -z "$CONSUL_BIND_INTERFACE" ]]; then
+    if [[ -z "${CONSUL_BIND_ADDRESS}" ]]; then
+        CONSUL_BIND_ADDRESS=0.0.0.0
+    fi
     if [[ -n "${CONSUL_BIND_ADDRESS}" ]]; then
         CONSUL_BIND="-bind=$CONSUL_BIND_ADDRESS"
         entrypoint_log "==> The CONSUL_BIND_INTERFACE is not set, using address '$CONSUL_BIND_ADDRESS' for bind option..."
@@ -32,6 +35,9 @@ if [[ -z "${CONSUL_BIND}" ]] && [[ -z "$CONSUL_BIND_INTERFACE" ]]; then
 fi
 # The address to which Consul will bind client interfaces, including the HTTP and DNS servers.
 if [[ -z "${CONSUL_CLIENT}" ]] && [[ -z "$CONSUL_CLIENT_INTERFACE" ]]; then
+    if [[ -z "${CONSUL_CLIENT_ADDRESS}" ]]; then
+        CONSUL_CLIENT_ADDRESS=0.0.0.0
+    fi
     if [[ -n "${CONSUL_CLIENT_ADDRESS}" ]]; then
         CONSUL_CLIENT="-client=$CONSUL_CLIENT_ADDRESS"
         entrypoint_log "==> The CONSUL_CLIENT_INTERFACE is not set, using address '$CONSUL_CLIENT_ADDRESS' for client option..."
