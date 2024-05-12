@@ -21,14 +21,14 @@ docker_bootstrap_set_arg() {
 if [[ -z "${CONSUL_BIND}" ]] && [[ -z "$CONSUL_BIND_INTERFACE" ]]; then
     if [[ -n "${CONSUL_BIND_ADDRESS}" ]]; then
         CONSUL_BIND="-bind=$CONSUL_BIND_ADDRESS"
-        echo "==> The CONSUL_BIND_INTERFACE is not set, using address '$CONSUL_BIND_ADDRESS' for bind option..."
+        entrypoint_log "==> The CONSUL_BIND_INTERFACE is not set, using address '$CONSUL_BIND_ADDRESS' for bind option..."
     fi
 fi
 # The address to which Consul will bind client interfaces, including the HTTP and DNS servers.
 if [[ -z "${CONSUL_CLIENT}" ]] && [[ -z "$CONSUL_CLIENT_INTERFACE" ]]; then
     if [[ -n "${CONSUL_CLIENT_ADDRESS}" ]]; then
         CONSUL_CLIENT="-client=$CONSUL_CLIENT_ADDRESS"
-        echo "==> The CONSUL_CLIENT_INTERFACE is not set, using address '$CONSUL_CLIENT_ADDRESS' for client option..."
+        entrypoint_log "==> The CONSUL_CLIENT_INTERFACE is not set, using address '$CONSUL_CLIENT_ADDRESS' for client option..."
     fi
 fi
 
@@ -45,7 +45,7 @@ if [[ -z "$CONSUL_ADVERTISE" ]]; then
         fi
 
         CONSUL_ADVERTISE="-advertise=$CONSUL_ADVERTISE_ADDRESS"
-        echo "==> Found address '$CONSUL_ADVERTISE_ADDRESS' for interface '$CONSUL_ADVERTISE_INTERFACE', setting advertise option..."
+        entrypoint_log "==> Found address '$CONSUL_ADVERTISE_ADDRESS' for interface '$CONSUL_ADVERTISE_INTERFACE', setting advertise option..."
     fi
 fi
 # The advertise WAN address is used to change the address that we advertise to server nodes joining through the WAN.
@@ -58,7 +58,7 @@ if [[ -z "$CONSUL_ADVERTISE_WAN" ]]; then
         fi
 
         CONSUL_ADVERTISE_WAN="-advertise-wan=$CONSUL_ADVERTISE_WAN_ADDRESS"
-        echo "==> Found address '$CONSUL_ADVERTISE_WAN_ADDRESS' for interface '$CONSUL_ADVERTISE_WAN_INTERFACE', setting advertise-wan option..."
+        entrypoint_log "==> Found address '$CONSUL_ADVERTISE_WAN_ADDRESS' for interface '$CONSUL_ADVERTISE_WAN_INTERFACE', setting advertise-wan option..."
     fi
 fi
 
