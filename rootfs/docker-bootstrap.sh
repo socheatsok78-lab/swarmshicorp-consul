@@ -16,7 +16,7 @@ docker_bootstrap_set_arg() {
 }
 docker_bootstrap_set_node_meta() {
     if [[ -n "${2}" ]]; then
-        entrypoint_log "==> Assigning node meta '${1}' with value '${2}'..."
+        entrypoint_log "==> Assigning node meta '${1}=${2}'..."
         docker_bootstrap_set_arg "-node-meta ${1}:${2}"
     fi
 }
