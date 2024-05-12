@@ -193,23 +193,23 @@ docker_bootstrap_set_arg "-log-json=${CONSUL_LOG_JSON}"
 
 # Docker Swarm specific metadata of the node and service
 # Example:
-# - CONSUL_NODE_META_SERVICE_ID={{.Service.ID}}
-# - CONSUL_NODE_META_SERVICE_NAME={{.Service.Name}}
-# - CONSUL_NODE_META_NODE_ID={{.Node.ID}}
-# - CONSUL_NODE_META_NODE_HOSTNAME={{.Node.Hostname}}
-# - CONSUL_NODE_META_TASK_ID={{.Task.ID}}
-# - CONSUL_NODE_META_TASK_NAME={{.Task.Name}}
-# - CONSUL_NODE_META_TASK_SLOT={{.Task.Slot}}
-# - CONSUL_NODE_META_TASK_SLOT={{.Task.Slot}}
-# - CONSUL_NODE_META_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
-docker_bootstrap_set_node_meta "dockerswarm-service-id" "$CONSUL_NODE_META_SERVICE_ID"
-docker_bootstrap_set_node_meta "dockerswarm-service-name" "$CONSUL_NODE_META_SERVICE_NAME"
-docker_bootstrap_set_node_meta "dockerswarm-node-id" "$CONSUL_NODE_META_NODE_ID"
-docker_bootstrap_set_node_meta "dockerswarm-node-hostname" "$CONSUL_NODE_META_NODE_HOSTNAME"
-docker_bootstrap_set_node_meta "dockerswarm-task-id" "$CONSUL_NODE_META_TASK_ID"
-docker_bootstrap_set_node_meta "dockerswarm-task-name" "$CONSUL_NODE_META_TASK_NAME"
-docker_bootstrap_set_node_meta "dockerswarm-task-slot" "$CONSUL_NODE_META_TASK_SLOT"
-docker_bootstrap_set_node_meta "dockerswarm-stack-namespace" "$CONSUL_NODE_META_STACK_NAMESPACE"
+# - DOCKERSWARM_SERVICE_ID={{.Service.ID}}
+# - DOCKERSWARM_SERVICE_NAME={{.Service.Name}}
+# - DOCKERSWARM_NODE_ID={{.Node.ID}}
+# - DOCKERSWARM_NODE_HOSTNAME={{.Node.Hostname}}
+# - DOCKERSWARM_TASK_ID={{.Task.ID}}
+# - DOCKERSWARM_TASK_NAME={{.Task.Name}}
+# - DOCKERSWARM_TASK_SLOT={{.Task.Slot}}
+# - DOCKERSWARM_TASK_SLOT={{.Task.Slot}}
+# - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
+docker_bootstrap_set_node_meta "dockerswarm-service-id" "$DOCKERSWARM_SERVICE_ID"
+docker_bootstrap_set_node_meta "dockerswarm-service-name" "$DOCKERSWARM_SERVICE_NAME"
+docker_bootstrap_set_node_meta "dockerswarm-node-id" "$DOCKERSWARM_NODE_ID"
+docker_bootstrap_set_node_meta "dockerswarm-node-hostname" "$DOCKERSWARM_NODE_HOSTNAME"
+docker_bootstrap_set_node_meta "dockerswarm-task-id" "$DOCKERSWARM_TASK_ID"
+docker_bootstrap_set_node_meta "dockerswarm-task-name" "$DOCKERSWARM_TASK_NAME"
+docker_bootstrap_set_node_meta "dockerswarm-task-slot" "$DOCKERSWARM_TASK_SLOT"
+docker_bootstrap_set_node_meta "dockerswarm-stack-namespace" "$DOCKERSWARM_STACK_NAMESPACE"
 
 # run the original entrypoint
 if [ "$1" = 'agent' ]; then

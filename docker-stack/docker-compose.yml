@@ -1,6 +1,7 @@
 services:
   server:
-    image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
+    image: swarmshicorp-consul:local
+    # image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
     command: agent -server -ui
     environment:
       # Cluster advertise address
@@ -9,18 +10,19 @@ services:
       # DO NOT CHANGE THIS VALUES BELOW
       # ===============================
       # Cluster bootstrap configuration
-      - CONSUL_BOOTSTRAP_EXPECT=3
-      - CONSUL_NODE_NAME=consul-{{.Task.Slot}}
-      - CONSUL_RETRY_JOIN=consul-1.svc.cluster.local
+      - CONSUL_BOOTSTRAP_EXPECT={{.Task.Slot}}
+      - CONSUL_RETRY_JOIN=server
+      # Node information
+      - CONSUL_NODE_NAME=consul-{{.Node.ID}}
       # Internal Docker Swarm configurations
-      - CONSUL_NODE_META_SERVICE_ID={{.Service.ID}}
-      - CONSUL_NODE_META_SERVICE_NAME={{.Service.Name}}
-      - CONSUL_NODE_META_NODE_ID={{.Node.ID}}
-      - CONSUL_NODE_META_NODE_HOSTNAME={{.Node.Hostname}}
-      - CONSUL_NODE_META_TASK_ID={{.Task.ID}}
-      - CONSUL_NODE_META_TASK_NAME={{.Task.Name}}
-      - CONSUL_NODE_META_TASK_SLOT={{.Task.Slot}}
-      - CONSUL_NODE_META_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
+      - DOCKERSWARM_SERVICE_ID={{.Service.ID}}
+      - DOCKERSWARM_SERVICE_NAME={{.Service.Name}}
+      - DOCKERSWARM_NODE_ID={{.Node.ID}}
+      - DOCKERSWARM_NODE_HOSTNAME={{.Node.Hostname}}
+      - DOCKERSWARM_TASK_ID={{.Task.ID}}
+      - DOCKERSWARM_TASK_NAME={{.Task.Name}}
+      - DOCKERSWARM_TASK_SLOT={{.Task.Slot}}
+      - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
     hostname: consul-{{.Task.Slot}}.svc.cluster.local
     ports:
       - "8500:8500"
@@ -31,6 +33,8 @@ services:
     deploy:
       mode: replicated
       replicas: 3
+      placement:
+        max_replicas_per_node: 1
       restart_policy:
         condition: on-failure
         delay: 5s
