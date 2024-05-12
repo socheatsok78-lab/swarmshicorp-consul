@@ -10,4 +10,4 @@ remove:
 
 clean:
 	@echo "Cleaning volumes..."
-	@docker volume ls -q  | grep consul- | xargs docker volume rm
+	@docker volume ls -q | grep consul- | xargs docker volume rm
