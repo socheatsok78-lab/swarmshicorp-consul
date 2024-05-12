@@ -3,7 +3,6 @@ make:
 	@echo "make [deploy|remove|clean]"
 
 deploy:
-	# ./gencert.sh
 	docker stack deploy -c docker-compose.yml --detach=true --with-registry-auth $(STACK_NAME)
 
 remove:
