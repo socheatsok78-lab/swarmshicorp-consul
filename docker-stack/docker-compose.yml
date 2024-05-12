@@ -40,7 +40,9 @@ services:
       - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
     hostname: consul-{{.Node.ID}}.svc.cluster.local
     ports:
-      - "8500:8500"
+      - published: 8500
+        target: 8500
+        mode: host
     networks:
       consul-net:
     volumes:

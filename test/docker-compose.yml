@@ -38,7 +38,7 @@ services:
       - DOCKERSWARM_TASK_NAME={{.Task.Name}}
       - DOCKERSWARM_TASK_SLOT={{.Task.Slot}}
       - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
-    hostname: consul-{{.Task.ID}}-{{.Task.Slot}}.svc.cluster.local
+    hostname: consul--tid-{{.Task.ID}}--tslot-{{.Task.Slot}}.svc.cluster.local
     ports:
       - "8500:8500"
     networks:
