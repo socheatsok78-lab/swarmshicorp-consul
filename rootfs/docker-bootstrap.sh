@@ -16,7 +16,7 @@ docker_bootstrap_set_arg() {
 }
 docker_bootstrap_set_node_meta() {
     if [[ -n "${2}" ]]; then
-        entrypoint_log "==> Assigning node meta '${1}=${2}'..."
+        entrypoint_log "==> Assigning node meta '${1}=${2}'"
         docker_bootstrap_set_arg "-node-meta ${1}:${2}"
     fi
 }
@@ -247,7 +247,7 @@ CONSUL_CHECK_UPDATE_INTERVAL=${CONSUL_CHECK_UPDATE_INTERVAL:-"5m"}
 CONSUL_AUTOPILOT_CLEANUP_DEAD_SERVERS=${CONSUL_AUTOPILOT_CLEANUP_DEAD_SERVERS:-"true"}
 CONSUL_AUTOPILOT_LAST_CONTACT_THRESHOLD=${CONSUL_AUTOPILOT_LAST_CONTACT_THRESHOLD:-"1m"}
 
-entrypoint_log "==> Generating configuration file at \"$CONSUL_CONFIG_DIR/docker.hcl\""
+entrypoint_log "==> Generating configuration file at \"$CONSUL_CONFIG_DIR/docker.hcl\"..."
 cat <<EOT > "$CONSUL_CONFIG_DIR/docker.hcl"
 # Consul will ignore a previous leave and attempt to rejoin the cluster when starting.
 # By default, Consul treats leave as a permanent intent and does not attempt to join the cluster again when starting.
