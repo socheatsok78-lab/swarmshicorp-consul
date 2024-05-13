@@ -118,11 +118,7 @@ fi
 # This option can be specified multiple times to specify multiple agents to join. By default, the agent won't join any nodes when it starts up.
 # The value can contain IPv4, IPv6, or DNS addresses. Literal IPv6 addresses must be enclosed in square brackets.
 # If multiple values are given, they are tried and retried in the order listed until the first succeeds.
-if [[ -n "${CONSUL_RETRY_JOIN_TEMPLATE}" ]]; then
-    CONSUL_RETRY_JOIN_ARG="$(eval echo -retry-join=${CONSUL_RETRY_JOIN_TEMPLATE})"
-    CONSUL_RETRY_JOIN_ARG="$(eval echo ${CONSUL_RETRY_JOIN_ARG})"
-    docker_bootstrap_set_arg "${CONSUL_RETRY_JOIN_ARG}"
-elif [[ -n "$CONSUL_RETRY_JOIN" ]]; then
+if [[ -n "$CONSUL_RETRY_JOIN" ]]; then
     docker_bootstrap_set_arg "-retry-join=${CONSUL_RETRY_JOIN}"
 fi
 
@@ -140,11 +136,7 @@ fi
 # This can be specified multiple times to specify multiple WAN agents to join. If multiple values are given,
 # they are tried and retried in the order listed until the first succeeds.
 # By default, the agent won't WAN join any nodes when it starts up.
-if [[ -n "${CONSUL_RETRY_JOIN_WAN_TEMPLATE}" ]]; then
-    CONSUL_RETRY_JOIN_WAN_ARG=$(eval echo -retry-join=${CONSUL_RETRY_JOIN_WAN_TEMPLATE})
-    CONSUL_RETRY_JOIN_WAN_ARG="$(eval echo ${CONSUL_RETRY_JOIN_WAN_ARG})"
-    docker_bootstrap_set_arg "${CONSUL_RETRY_JOIN_WAN_ARG}"
-elif [[ -n "$CONSUL_RETRY_JOIN_WAN" ]]; then
+if [[ -n "$CONSUL_RETRY_JOIN_WAN" ]]; then
     docker_bootstrap_set_arg "-retry-join-wan=${CONSUL_RETRY_JOIN_WAN}"
 fi
 # Time to wait between -retry-join-wan attempts. Defaults to 30s.
