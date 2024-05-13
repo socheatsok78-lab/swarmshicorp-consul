@@ -1,4 +1,4 @@
-STACK_NAME := consul-test
+STACK_NAME := consul_test
 make:
 	@echo "make [deploy|remove|clean]"
 

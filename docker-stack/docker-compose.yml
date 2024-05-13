@@ -1,68 +1,80 @@
-x-restart_policy: &x-restart_policy
-  condition: on-failure
-  delay: 5s
-  max_attempts: 3
-  window: 120s
-x-update_config: &x-update_config
-  order: start-first
-  monitor: 120s
-  parallelism: 1
-  failure_action: pause
-  max_failure_ratio: 0.1
-x-rollback_config: &x-rollback_config
-  order: start-first
-  parallelism: 1
-  monitor: 120s
-  failure_action: pause
-  max_failure_ratio: 0.1
+x-consul: &x-consul
+  image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
+  environment:
+    # Cluster bootstrap configuration
+    - CONSUL_RETRY_JOIN=tasks.server
+    - CONSUL_ADVERTISE_INTERFACE=eth0
+    # ===============================
+    # DO NOT CHANGE THIS VALUES BELOW
+    # ===============================
+    # Internal Docker Swarm configurations
+    - DOCKERSWARM_SERVICE_ID={{.Service.ID}}
+    - DOCKERSWARM_SERVICE_NAME={{.Service.Name}}
+    - DOCKERSWARM_NODE_ID={{.Node.ID}}
+    - DOCKERSWARM_NODE_HOSTNAME={{.Node.Hostname}}
+    - DOCKERSWARM_TASK_ID={{.Task.ID}}
+    - DOCKERSWARM_TASK_NAME={{.Task.Name}}
+    - DOCKERSWARM_TASK_SLOT={{.Task.Slot}}
+    - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
+
+x-deploy-policy: &x-deploy-policy
+  restart_policy:
+    condition: on-failure
+    delay: 5s
+    max_attempts: 3
+    window: 60s
+  update_config:
+    order: start-first
+    monitor: 60s
+    parallelism: 1
+    failure_action: pause
+    max_failure_ratio: 0.1
+  rollback_config:
+    order: start-first
+    parallelism: 1
+    monitor: 60s
+    failure_action: pause
+    max_failure_ratio: 0.1
 
 services:
   server:
-    image: swarmshicorp-consul:local
-    # image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
-    command: agent -server -ui
-    environment:
-      # Cluster bootstrap configuration
-      - CONSUL_RETRY_JOIN=server
-      - CONSUL_BOOTSTRAP_EXPECT={{.Task.Slot}}
-      - CONSUL_ADVERTISE_INTERFACE=eth0
-      # ===============================
-      # DO NOT CHANGE THIS VALUES BELOW
-      # ===============================
-      # Internal Docker Swarm configurations
-      - DOCKERSWARM_SERVICE_ID={{.Service.ID}}
-      - DOCKERSWARM_SERVICE_NAME={{.Service.Name}}
-      - DOCKERSWARM_NODE_ID={{.Node.ID}}
-      - DOCKERSWARM_NODE_HOSTNAME={{.Node.Hostname}}
-      - DOCKERSWARM_TASK_ID={{.Task.ID}}
-      - DOCKERSWARM_TASK_NAME={{.Task.Name}}
-      - DOCKERSWARM_TASK_SLOT={{.Task.Slot}}
-      - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
-    hostname: consul-{{.Node.ID}}.svc.cluster.local
+    <<: *x-consul
+    command: agent -server -ui -bootstrap-expect=3
+    hostname: server-{{.Task.ID}}.svc.cluster.local
+    networks:
+      consul-internal:
+    volumes:
+      - consul-server-data:/consul/data
+    deploy:
+      <<: *x-deploy-policy
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+
+  agent:
+    <<: *x-consul
+    command: agent -ui
+    hostname: agent-{{.Task.ID}}.svc.cluster.local
     ports:
       - published: 8500
         target: 8500
+        protocol: tcp
         mode: host
     networks:
-      consul-net:
+      consul-internal:
     volumes:
-      - consul-data:/consul/data
+      - consul-agent-data:/consul/data
+    depends_on:
+      - server
     deploy:
-      mode: replicated
-      replicas: 3
-      placement:
-        max_replicas_per_node: 1
-        constraints:
-          - node.role == manager
-        preferences:
-          - spread: node.id
-      restart_policy: *x-restart_policy
-      update_config: *x-update_config
-      rollback_config: *x-rollback_config
+      <<: *x-deploy-policy
+      mode: global
 
 volumes:
-  consul-data:
+  consul-server-data:
+  consul-agent-data:
 
 networks:
-  consul-net:
+  consul-internal:
     driver: overlay
