@@ -47,9 +47,8 @@ if [[ -n "${CONSUL_DOCKERSWARM_AUTOPILOT}" ]]; then
         CONSUL_NODE_ID=$(cat "$CONSUL_DATA_DIR/node-id")
         entrypoint_log "==> [Docker Swarm Autopilot] Using '$CONSUL_NODE_ID' as node ID..."
     else
-        entrypoint_log -n "==> [Docker Swarm Autopilot] Generate a random node ID which will be persisted in the data directory..."
+        entrypoint_log "==> [Docker Swarm Autopilot] Generate a random node ID which will be persisted in the data directory..."
     fi
-    
 fi
 
 # Address Bind Options
