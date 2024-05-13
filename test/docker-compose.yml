@@ -39,7 +39,7 @@ x-deploy-policy: &x-deploy-policy
 services:
   server:
     <<: *x-consul
-    command: agent -server -ui -bootstrap-expect=3
+    command: agent -server -bootstrap-expect=3 -ui
     hostname: server-{{.Task.ID}}.svc.cluster.local
     ports:
       - "8550:8500"
