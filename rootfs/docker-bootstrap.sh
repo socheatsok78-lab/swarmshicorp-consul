@@ -134,8 +134,6 @@ elif [[ -n "${CONSUL_NODE_ID}" ]]; then
     docker_bootstrap_set_arg "-node-id=${CONSUL_NODE_ID}"
 fi
 
-
-
 # The name of this node in the cluster. This must be unique within the cluster.
 # By default this is the hostname of the machine.
 # The node name cannot contain whitespace or quotation marks.
@@ -144,6 +142,7 @@ if [[ -z "${CONSUL_NODE_NAME}" ]]; then
     CONSUL_NODE_NAME=$(hostname -s)
 fi
 docker_bootstrap_set_arg "-node=${CONSUL_NODE_NAME}"
+docker_bootstrap_set_node_meta "dockerswarm-consul-node-name" "$CONSUL_NODE_NAME"
 
 # Bootstrap Options
 # 
@@ -245,8 +244,6 @@ docker_bootstrap_set_node_meta "dockerswarm-task-id" "$DOCKERSWARM_TASK_ID"
 docker_bootstrap_set_node_meta "dockerswarm-task-name" "$DOCKERSWARM_TASK_NAME"
 docker_bootstrap_set_node_meta "dockerswarm-task-slot" "$DOCKERSWARM_TASK_SLOT"
 docker_bootstrap_set_node_meta "dockerswarm-stack-namespace" "$DOCKERSWARM_STACK_NAMESPACE"
-# 
-docker_bootstrap_set_node_meta "dockerswarm-consul-node-name" "$CONSUL_NODE_NAME"
 
 # Consul Configuration for Docker Swarm
 
