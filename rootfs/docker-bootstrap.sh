@@ -213,6 +213,14 @@ docker_bootstrap_set_node_meta "dockerswarm-task-name" "$DOCKERSWARM_TASK_NAME"
 docker_bootstrap_set_node_meta "dockerswarm-task-slot" "$DOCKERSWARM_TASK_SLOT"
 docker_bootstrap_set_node_meta "dockerswarm-stack-namespace" "$DOCKERSWARM_STACK_NAMESPACE"
 
+# Consul Autopilot for Docker Swarm
+if [[ -n "${CONSUL_DOCKERSWARM_AUTOPILOT}" ]]; then
+    if [[ -z "${CONSUL_NODE_ID}" ]]; then
+        entrypoint_log "==> Generate a random node ID which will be persisted in the data directory..."
+        docker_bootstrap_set_arg "-disable-host-node-id"
+    fi
+fi
+
 # Consul Configuration for Docker Swarm
 
 if [ -z "$CONSUL_CONFIG_DIR" ]; then
