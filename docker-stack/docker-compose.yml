@@ -39,8 +39,8 @@ x-deploy-policy: &x-deploy-policy
 services:
   server:
     <<: *x-consul
-    command: agent -server -bootstrap-expect=3
-    hostname: server-{{.Task.ID}}.svc.cluster.local
+    command: agent -server -bootstrap-expect=1
+    hostname: server-{{.Node.ID}}.svc.cluster.local
     networks:
       consul-internal:
     volumes:
@@ -55,7 +55,7 @@ services:
   agent:
     <<: *x-consul
     command: agent -ui
-    hostname: agent-{{.Task.ID}}.svc.cluster.local
+    hostname: agent-{{.Node.ID}}.svc.cluster.local
     ports:
       - published: 8500
         target: 8500
