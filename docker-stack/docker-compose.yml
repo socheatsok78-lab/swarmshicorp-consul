@@ -39,7 +39,7 @@ x-deploy-policy: &x-deploy-policy
 services:
   server:
     <<: *x-consul
-    command: agent -server -bootstrap-expect=1
+    command: agent -server -bootstrap-expect=3
     hostname: server-{{.Node.ID}}.svc.cluster.local
     networks:
       consul-internal:
