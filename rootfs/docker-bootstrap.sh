@@ -218,6 +218,36 @@ docker_bootstrap_set_node_meta "dockerswarm-task-name" "$DOCKERSWARM_TASK_NAME"
 docker_bootstrap_set_node_meta "dockerswarm-task-slot" "$DOCKERSWARM_TASK_SLOT"
 docker_bootstrap_set_node_meta "dockerswarm-stack-namespace" "$DOCKERSWARM_STACK_NAMESPACE"
 
+# Consul Configuration for Docker Swarm
+
+if [ -z "$CONSUL_CONFIG_DIR" ]; then
+  CONSUL_CONFIG_DIR=/consul/config
+fi
+
+CONSUL_REJOIN_AFTER_LEAVE=${CONSUL_REJOIN_AFTER_LEAVE:-"false"}
+CONSUL_LEAVE_ON_TERMINATE=${CONSUL_LEAVE_ON_TERMINATE:-"true"}
+CONSUL_AUTOPILOT_CLEANUP_DEAD_SERVERS=${CONSUL_AUTOPILOT_CLEANUP_DEAD_SERVERS:-"true"}
+CONSUL_AUTOPILOT_LAST_CONTACT_THRESHOLD=${CONSUL_AUTOPILOT_LAST_CONTACT_THRESHOLD:-"1m"}
+CONSUL_AUTOPILOT_MIN_QUORUM=${CONSUL_AUTOPILOT_MIN_QUORUM:-${CONSUL_BOOTSTRAP_EXPECT:-"3"}}
+
+entrypoint_log "==> Generating configuration file at \"$CONSUL_CONFIG_DIR/docker.hcl\""
+cat <<EOT > "$CONSUL_CONFIG_DIR/docker.hcl"
+rejoin_after_leave = $CONSUL_REJOIN_AFTER_LEAVE
+leave_on_terminate = $CONSUL_LEAVE_ON_TERMINATE
+disable_update_check = true
+
+autopilot {
+    cleanup_dead_servers = $CONSUL_AUTOPILOT_CLEANUP_DEAD_SERVERS
+    last_contact_threshold = "$CONSUL_AUTOPILOT_LAST_CONTACT_THRESHOLD"
+    min_quorum = $CONSUL_AUTOPILOT_MIN_QUORUM
+}
+
+telemetry {
+    prometheus_retention_time = "24h"
+    disable_hostname = true
+}
+EOT
+
 # run the original entrypoint
 if [ "$1" = 'agent' ]; then
     shift
