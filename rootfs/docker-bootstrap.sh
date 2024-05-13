@@ -90,10 +90,15 @@ fi
 # Generate a new UUID for the Consul agent using DOCKERSWARM_NODE_ID
 # This is used to determine the node's identity in the gossip protocol.
 if [[ -z "${CONSUL_NODE_ID}" ]]; then
-    CONSUL_NODE_ID=$(uuidgen --namespace @dns --name $(hostname) --sha1)
+    if [[ -n "${CONSUL_NODE_ID_TEMPLATE}" ]]; then
+        CONSUL_NODE_ID=$(uuidgen --namespace @dns --name $CONSUL_NODE_ID_TEMPLATE --sha1)
+    else
+        CONSUL_NODE_ID=$(uuidgen --namespace @dns --name $(hostname -s) --sha1)
+    fi
     docker_bootstrap_set_arg "-node-id=${CONSUL_NODE_ID}"
     entrypoint_log "==> Generated node ID '$CONSUL_NODE_ID' for node '$(hostname)'..."
 fi
+
 # The name of this node in the cluster. This must be unique within the cluster.
 # By default this is the hostname of the machine.
 # The node name cannot contain whitespace or quotation marks.
