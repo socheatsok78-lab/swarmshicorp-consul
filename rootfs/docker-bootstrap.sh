@@ -142,7 +142,7 @@ if [[ -z "${CONSUL_NODE_NAME}" ]]; then
     CONSUL_NODE_NAME=$(hostname -s)
 fi
 docker_bootstrap_set_arg "-node=${CONSUL_NODE_NAME}"
-docker_bootstrap_set_node_meta "dockerswarm-autopilot-node-name" "$CONSUL_NODE_NAME"
+docker_bootstrap_set_node_meta "dockerswarm-consul-node-name" "$CONSUL_NODE_NAME"
 
 # Bootstrap Options
 # 
