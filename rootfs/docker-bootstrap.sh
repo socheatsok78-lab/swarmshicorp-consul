@@ -224,22 +224,26 @@ if [ -z "$CONSUL_CONFIG_DIR" ]; then
   CONSUL_CONFIG_DIR=/consul/config
 fi
 
-CONSUL_REJOIN_AFTER_LEAVE=${CONSUL_REJOIN_AFTER_LEAVE:-"false"}
-CONSUL_LEAVE_ON_TERMINATE=${CONSUL_LEAVE_ON_TERMINATE:-"true"}
+CONSUL_CHECK_UPDATE_INTERVAL=${CONSUL_CHECK_UPDATE_INTERVAL:-"5m"}
 CONSUL_AUTOPILOT_CLEANUP_DEAD_SERVERS=${CONSUL_AUTOPILOT_CLEANUP_DEAD_SERVERS:-"true"}
 CONSUL_AUTOPILOT_LAST_CONTACT_THRESHOLD=${CONSUL_AUTOPILOT_LAST_CONTACT_THRESHOLD:-"1m"}
-CONSUL_AUTOPILOT_MIN_QUORUM=${CONSUL_AUTOPILOT_MIN_QUORUM:-${CONSUL_BOOTSTRAP_EXPECT:-"3"}}
 
 entrypoint_log "==> Generating configuration file at \"$CONSUL_CONFIG_DIR/docker.hcl\""
 cat <<EOT > "$CONSUL_CONFIG_DIR/docker.hcl"
-rejoin_after_leave = $CONSUL_REJOIN_AFTER_LEAVE
-leave_on_terminate = $CONSUL_LEAVE_ON_TERMINATE
+# This interval controls how often check output from checks in a steady state is synchronized with the server.
+# Many checks which are in a steady state produce slightly different output per run (timestamps, etc) which cause constant writes.
+# This configuration allows deferring the sync of check output for a given interval to reduce write pressure.
+# If a check ever changes state, the new state and associated output is synchronized immediately.
+# By default, this is set to 5 minutes ("5m").
+# To disable this behavior, set the value to "0s".
+check_update_interval = "$CONSUL_CHECK_UPDATE_INTERVAL"
+
+# Disables automatic checking for security bulletins and new version releases.
 disable_update_check = true
 
 autopilot {
     cleanup_dead_servers = $CONSUL_AUTOPILOT_CLEANUP_DEAD_SERVERS
     last_contact_threshold = "$CONSUL_AUTOPILOT_LAST_CONTACT_THRESHOLD"
-    min_quorum = $CONSUL_AUTOPILOT_MIN_QUORUM
 }
 
 telemetry {
