@@ -231,6 +231,8 @@ cat <<EOT > "$CONSUL_CONFIG_DIR/docker.hcl"
 # This flag allows the previous state to be used to rejoin the cluster.
 rejoin_after_leave = $CONSUL_REJOIN_AFTER_LEAVE
 
+# leave_on_terminate = On agents in client-mode, this defaults to true and for agents in server-mode, this defaults to false.
+
 # This interval controls how often check output from checks in a steady state is synchronized with the server.
 # Many checks which are in a steady state produce slightly different output per run (timestamps, etc) which cause constant writes.
 # This configuration allows deferring the sync of check output for a given interval to reduce write pressure.
