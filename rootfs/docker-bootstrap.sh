@@ -37,7 +37,9 @@ fi
 if [[ -n "${CONSUL_DOCKERSWARM_AUTOPILOT}" ]]; then
     entrypoint_log "==> Enable Consul Autopilot for Docker Swarm..."
 
-    CONSUL_NODE_NAME="${DOCKERSWARM_SERVICE_NAME}_${DOCKERSWARM_TASK_SLOT}"
+    # Use DOCKERSWARM_SERVICE_NAME with DOCKERSWARM_TASK_SLOT as node name
+    # To ensure that the node name is a valid domain name, we replace '_' with '-'
+    CONSUL_NODE_NAME=$(echo "${DOCKERSWARM_SERVICE_NAME}_${DOCKERSWARM_TASK_SLOT}" | tr '_' '-')
     entrypoint_log "==> [Docker Swarm Autopilot] Using '$CONSUL_NODE_NAME' as node name..."
 
     CONSUL_DISABLE_HOST_NODE_ID=true
