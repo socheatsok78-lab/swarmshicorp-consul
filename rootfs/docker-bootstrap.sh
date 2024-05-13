@@ -163,12 +163,6 @@ fi
 if [[ -n "$CONSUL_PRIMARY_GATEWAY" ]]; then
     docker_bootstrap_set_arg "-primary-gateway=${CONSUL_PRIMARY_GATEWAY}"
 fi
-# When provided, Consul will ignore a previous leave and attempt to rejoin the cluster when starting.
-# By default, Consul treats leave as a permanent intent and does not attempt to join the cluster again when starting.
-# This flag allows the previous state to be used to rejoin the cluster.
-if [[ -n "$CONSUL_REJOIN" ]]; then
-    docker_bootstrap_set_arg "-rejoin"
-fi
 
 # DNS and Domain Options
 # 
@@ -225,12 +219,18 @@ if [ -z "$CONSUL_CONFIG_DIR" ]; then
   CONSUL_CONFIG_DIR=/consul/config
 fi
 
+CONSUL_REJOIN_AFTER_LEAVE=${CONSUL_REJOIN_AFTER_LEAVE:-"true"}
 CONSUL_CHECK_UPDATE_INTERVAL=${CONSUL_CHECK_UPDATE_INTERVAL:-"5m"}
 CONSUL_AUTOPILOT_CLEANUP_DEAD_SERVERS=${CONSUL_AUTOPILOT_CLEANUP_DEAD_SERVERS:-"true"}
 CONSUL_AUTOPILOT_LAST_CONTACT_THRESHOLD=${CONSUL_AUTOPILOT_LAST_CONTACT_THRESHOLD:-"1m"}
 
 entrypoint_log "==> Generating configuration file at \"$CONSUL_CONFIG_DIR/docker.hcl\""
 cat <<EOT > "$CONSUL_CONFIG_DIR/docker.hcl"
+# Consul will ignore a previous leave and attempt to rejoin the cluster when starting.
+# By default, Consul treats leave as a permanent intent and does not attempt to join the cluster again when starting.
+# This flag allows the previous state to be used to rejoin the cluster.
+rejoin_after_leave = $CONSUL_REJOIN_AFTER_LEAVE
+
 # This interval controls how often check output from checks in a steady state is synchronized with the server.
 # Many checks which are in a steady state produce slightly different output per run (timestamps, etc) which cause constant writes.
 # This configuration allows deferring the sync of check output for a given interval to reduce write pressure.
