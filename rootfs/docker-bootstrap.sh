@@ -21,6 +21,35 @@ docker_bootstrap_set_node_meta() {
     fi
 }
 
+# CONSUL_DATA_DIR is exposed as a volume for possible persistent storage. The
+# CONSUL_CONFIG_DIR isn't exposed as a volume but you can compose additional
+# config files in there if you use this image as a base, or use CONSUL_LOCAL_CONFIG
+# below.
+if [ -z "$CONSUL_DATA_DIR" ]; then
+  CONSUL_DATA_DIR=/consul/data
+fi
+
+if [ -z "$CONSUL_CONFIG_DIR" ]; then
+  CONSUL_CONFIG_DIR=/consul/config
+fi
+
+# Consul Autopilot for Docker Swarm
+if [[ -n "${CONSUL_DOCKERSWARM_AUTOPILOT}" ]]; then
+    entrypoint_log "==> Enable Consul Autopilot for Docker Swarm..."
+
+    CONSUL_NODE_NAME="${DOCKERSWARM_SERVICE_NAME}_${DOCKERSWARM_TASK_SLOT}"
+    entrypoint_log "==> [Docker Swarm Autopilot] Using '$CONSUL_NODE_NAME' as node name..."
+
+    CONSUL_DISABLE_HOST_NODE_ID=true
+    if [ -f "$CONSUL_DATA_DIR/node-id" ]; then
+        CONSUL_NODE_ID=$(cat "$CONSUL_DATA_DIR/node-id")
+        entrypoint_log "==> [Docker Swarm Autopilot] Using '$CONSUL_NODE_ID' as node ID..."
+    else
+        entrypoint_log -n "==> [Docker Swarm Autopilot] Generate a random node ID which will be persisted in the data directory..."
+    fi
+    
+fi
+
 # Address Bind Options
 #
 # The address to which Consul will bind client interfaces, including the HTTP and DNS servers.
@@ -89,11 +118,17 @@ fi
 #
 # Generate a new UUID for the Consul agent using the short hostname.
 # This is used to determine the node's identity in the gossip protocol.
-if [[ -z "$CONSUL_DOCKERSWARM_AUTOPILOT" ]] && [[ -z "${CONSUL_NODE_ID}" ]]; then
+if [[ -n "${CONSUL_DISABLE_HOST_NODE_ID}" ]]; then
+    docker_bootstrap_set_arg "-disable-host-node-id"
+elif [[ -z "${CONSUL_NODE_ID}" ]]; then
     CONSUL_NODE_ID=$(uuidgen --namespace @dns --name $(hostname -s) --sha1)
     docker_bootstrap_set_arg "-node-id=${CONSUL_NODE_ID}"
     entrypoint_log "==> Generated node ID '$CONSUL_NODE_ID' for node '$(hostname)'..."
+elif [[ -n "${CONSUL_NODE_ID}" ]]; then
+    docker_bootstrap_set_arg "-node-id=${CONSUL_NODE_ID}"
 fi
+
+
 
 # The name of this node in the cluster. This must be unique within the cluster.
 # By default this is the hostname of the machine.
@@ -205,19 +240,7 @@ docker_bootstrap_set_node_meta "dockerswarm-task-name" "$DOCKERSWARM_TASK_NAME"
 docker_bootstrap_set_node_meta "dockerswarm-task-slot" "$DOCKERSWARM_TASK_SLOT"
 docker_bootstrap_set_node_meta "dockerswarm-stack-namespace" "$DOCKERSWARM_STACK_NAMESPACE"
 
-# Consul Autopilot for Docker Swarm
-if [[ -n "${CONSUL_DOCKERSWARM_AUTOPILOT}" ]]; then
-    if [[ -z "${CONSUL_NODE_ID}" ]]; then
-        entrypoint_log "==> Generate a random node ID which will be persisted in the data directory..."
-        docker_bootstrap_set_arg "-disable-host-node-id"
-    fi
-fi
-
 # Consul Configuration for Docker Swarm
-
-if [ -z "$CONSUL_CONFIG_DIR" ]; then
-  CONSUL_CONFIG_DIR=/consul/config
-fi
 
 CONSUL_REJOIN_AFTER_LEAVE=${CONSUL_REJOIN_AFTER_LEAVE:-"true"}
 CONSUL_CHECK_UPDATE_INTERVAL=${CONSUL_CHECK_UPDATE_INTERVAL:-"5m"}
