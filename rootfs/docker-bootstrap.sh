@@ -14,10 +14,15 @@ docker_bootstrap_set_arg() {
     fi
     DOCKER_BOOTSTRAP_ARGS="${DOCKER_BOOTSTRAP_ARGS}${1}"
 }
+
+DOCKER_BOOTSTRAP_NODE_META=""
 docker_bootstrap_set_node_meta() {
-    if [[ -n "${2}" ]]; then
+    if [[ -n "${1}" ]] && [[ -n "${2}" ]]; then
+        if [[ -n "${DOCKER_BOOTSTRAP_NODE_META}" ]]; then
+            DOCKER_BOOTSTRAP_NODE_META="${DOCKER_BOOTSTRAP_NODE_META} "
+        fi
         entrypoint_log "==> Assigning node meta '${1}=${2}'"
-        docker_bootstrap_set_arg "-node-meta ${1}:${2}"
+        DOCKER_BOOTSTRAP_NODE_META="${DOCKER_BOOTSTRAP_NODE_META}-node-meta ${1}:${2}"
     fi
 }
 
@@ -240,6 +245,8 @@ docker_bootstrap_set_node_meta "dockerswarm-task-id" "$DOCKERSWARM_TASK_ID"
 docker_bootstrap_set_node_meta "dockerswarm-task-name" "$DOCKERSWARM_TASK_NAME"
 docker_bootstrap_set_node_meta "dockerswarm-task-slot" "$DOCKERSWARM_TASK_SLOT"
 docker_bootstrap_set_node_meta "dockerswarm-stack-namespace" "$DOCKERSWARM_STACK_NAMESPACE"
+# 
+docker_bootstrap_set_node_meta "dockerswarm-consul-node-name" "$CONSUL_NODE_NAME"
 
 # Consul Configuration for Docker Swarm
 
@@ -282,6 +289,6 @@ EOT
 # run the original entrypoint
 if [ "$1" = 'agent' ]; then
     shift
-    set -- agent $CONSUL_BIND $CONSUL_CLIENT $CONSUL_ADVERTISE $CONSUL_ADVERTISE_WAN $DOCKER_BOOTSTRAP_ARGS "$@"
+    set -- agent $CONSUL_BIND $CONSUL_CLIENT $CONSUL_ADVERTISE $CONSUL_ADVERTISE_WAN $DOCKER_BOOTSTRAP_ARGS $DOCKER_BOOTSTRAP_NODE_META "$@"
 fi
 exec docker-entrypoint.sh "${@}"
