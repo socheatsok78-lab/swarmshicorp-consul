@@ -1,23 +1,3 @@
-x-consul: &x-consul
-  image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
-  environment:
-    # Cluster bootstrap configuration
-    - CONSUL_RETRY_JOIN=tasks.server
-    - CONSUL_ADVERTISE_INTERFACE=eth0
-    # ===============================
-    # DO NOT CHANGE THIS VALUES BELOW
-    # ===============================
-    - CONSUL_DOCKERSWARM_AUTOPILOT=true
-    # Internal Docker Swarm configurations
-    - DOCKERSWARM_SERVICE_ID={{.Service.ID}}
-    - DOCKERSWARM_SERVICE_NAME={{.Service.Name}}
-    - DOCKERSWARM_NODE_ID={{.Node.ID}}
-    - DOCKERSWARM_NODE_HOSTNAME={{.Node.Hostname}}
-    - DOCKERSWARM_TASK_ID={{.Task.ID}}
-    - DOCKERSWARM_TASK_NAME={{.Task.Name}}
-    - DOCKERSWARM_TASK_SLOT={{.Task.Slot}}
-    - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
-
 x-deploy-policy: &x-deploy-policy
   restart_policy:
     condition: on-failure
@@ -39,10 +19,28 @@ x-deploy-policy: &x-deploy-policy
 
 services:
   server:
-    <<: *x-consul
+    image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
+    environment:
+      # Cluster bootstrap configuration
+      - CONSUL_RETRY_JOIN=tasks.server
+      - CONSUL_ADVERTISE_INTERFACE=eth0
+      # ===============================
+      # DO NOT CHANGE THIS VALUES BELOW
+      # ===============================
+      - CONSUL_DOCKERSWARM_AUTOPILOT=true
+      # Internal Docker Swarm configurations
+      - DOCKERSWARM_SERVICE_ID={{.Service.ID}}
+      - DOCKERSWARM_SERVICE_NAME={{.Service.Name}}
+      - DOCKERSWARM_NODE_ID={{.Node.ID}}
+      - DOCKERSWARM_NODE_HOSTNAME={{.Node.Hostname}}
+      - DOCKERSWARM_TASK_ID={{.Task.ID}}
+      - DOCKERSWARM_TASK_NAME={{.Task.Name}}
+      - DOCKERSWARM_TASK_SLOT={{.Task.Slot}}
+      - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
     command: agent -server -bootstrap-expect=3
     hostname: server-{{.Node.ID}}.svc.cluster.local
     networks:
+      # eth0
       - server_network
     volumes:
       - consul-server-data:/consul/data
@@ -54,7 +52,25 @@ services:
           - node.role == manager
 
   agent:
-    <<: *x-consul
+    image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
+    environment:
+      # Cluster bootstrap configuration
+      - CONSUL_RETRY_JOIN=tasks.server
+      - CONSUL_ADVERTISE_INTERFACE=eth1
+      - CONSUL_ADVERTISE_WAN_INTERFACE=eth0
+      # ===============================
+      # DO NOT CHANGE THIS VALUES BELOW
+      # ===============================
+      - CONSUL_DOCKERSWARM_AUTOPILOT=true
+      # Internal Docker Swarm configurations
+      - DOCKERSWARM_SERVICE_ID={{.Service.ID}}
+      - DOCKERSWARM_SERVICE_NAME={{.Service.Name}}
+      - DOCKERSWARM_NODE_ID={{.Node.ID}}
+      - DOCKERSWARM_NODE_HOSTNAME={{.Node.Hostname}}
+      - DOCKERSWARM_TASK_ID={{.Task.ID}}
+      - DOCKERSWARM_TASK_NAME={{.Task.Name}}
+      - DOCKERSWARM_TASK_SLOT={{.Task.Slot}}
+      - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
     command: agent -ui
     hostname: agent-{{.Node.ID}}.svc.cluster.local
     ports:
@@ -63,8 +79,10 @@ services:
         protocol: tcp
         mode: host
     networks:
-      - server_network
+      # eth0
       - public_network
+      # eth1
+      - server_network
     volumes:
       - consul-agent-data:/consul/data
     depends_on:
@@ -78,5 +96,5 @@ volumes:
   consul-agent-data:
 
 networks:
-  server_network:
   public_network:
+  server_network:
