@@ -38,6 +38,23 @@ if [ -z "$CONSUL_CONFIG_DIR" ]; then
   CONSUL_CONFIG_DIR=/consul/config
 fi
 
+if [[ -n "${HASHICORP_NODE_PROVISIONING}" ]]; then
+    HASHICORP_NODE_PROVISIONING_DIR=${HASHICORP_NODE_PROVISIONING_DIR:-"/.swarmshicorp-node-provisioning"}
+    HASHICORP_NODE_PROVISIONING_FILE=${HASHICORP_NODE_PROVISIONING_FILE:-"${HASHICORP_NODE_PROVISIONING_DIR}/activate"}
+
+    while [ ! -f "$HASHICORP_NODE_PROVISIONING_FILE" ]; do
+        entrypoint_log "==> Waiting for node provisioning file '$HASHICORP_NODE_PROVISIONING_FILE' to be created..."
+        sleep 1
+    done
+
+    source "$HASHICORP_NODE_PROVISIONING_FILE"
+
+    CONSUL_BIND_ADDRESS=$HASHICORP_NODE_BIND_ADDRESS
+    CONSUL_CLIENT_ADDRESS=$HASHICORP_NODE_CLIENT_ADDRESS
+    CONSUL_ADVERTISE_ADDRESS=$HASHICORP_NODE_ADVERTISE_ADDRESS
+    CONSUL_ADVERTISE_WAN_ADDRESS=$HASHICORP_NODE_ADVERTISE_WAN_ADDRESS
+fi
+
 # Consul Autopilot for Docker Swarm
 if [[ -n "${CONSUL_DOCKERSWARM_AUTOPILOT}" ]]; then
     entrypoint_log "==> Enable Consul Autopilot for Docker Swarm..."

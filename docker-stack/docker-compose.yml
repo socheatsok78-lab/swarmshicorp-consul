@@ -18,6 +18,16 @@ x-deploy-policy: &x-deploy-policy
     max_failure_ratio: 0.1
 
 services:
+  node-provisioning:
+    image: ghcr.io/socheatsok78-lab/swarmshicorp-node-provisioning:main
+    environment:
+      - HASHICORP_NODE_PROVISIONING_DIR=/.swarmshicorp-node-provisioning
+    network_mode: host
+    volumes:
+      - node_provisioning_data:/.swarmshicorp-node-provisioning
+    deploy:
+      mode: global-job
+
   server:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
     environment:
@@ -43,7 +53,8 @@ services:
       # eth0
       - server_network
     volumes:
-      - consul-server-data:/consul/data
+      - server_data:/consul/data
+      - node_provisioning_data:/.swarmshicorp-node-provisioning
     deploy:
       <<: *x-deploy-policy
       mode: global
@@ -81,22 +92,23 @@ services:
     networks:
       - public_network
       - server_network
-      - host_network
     volumes:
-      - consul-agent-data:/consul/data
+      - agent_data:/consul/data
+      - node_provisioning_data:/.swarmshicorp-node-provisioning
     depends_on:
       - server
     deploy:
       <<: *x-deploy-policy
       mode: global
+      placement:
+        constraints:
+          - node.role == worker
 
 volumes:
-  consul-server-data:
-  consul-agent-data:
+  node_provisioning_data:
+  server_data:
+  agent_data:
 
 networks:
-  host_network:
-    name: host
-    external: true
   public_network:
   server_network:
