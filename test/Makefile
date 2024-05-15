@@ -11,3 +11,8 @@ remove:
 clean:
 	@echo "Cleaning volumes..."
 	@docker volume ls -q | grep consul- | xargs docker volume rm
+
+reboot:
+	@$(MAKE) remove || true
+	@sleep 15
+	@$(MAKE) deploy
