@@ -79,10 +79,9 @@ services:
         protocol: tcp
         mode: host
     networks:
-      # eth0
       - public_network
-      # eth1
       - server_network
+      - host_network
     volumes:
       - consul-agent-data:/consul/data
     depends_on:
@@ -96,5 +95,8 @@ volumes:
   consul-agent-data:
 
 networks:
+  host_network:
+    name: host
+    external: true
   public_network:
   server_network:
