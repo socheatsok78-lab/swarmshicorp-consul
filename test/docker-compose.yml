@@ -43,7 +43,7 @@ services:
     command: agent -server -bootstrap-expect=3
     hostname: server-{{.Task.Slot}}.{{.Task.ID}}.svc.cluster.local
     networks:
-      consul-internal:
+      - server_network
     volumes:
       - consul-server-data:/consul/data
     deploy:
@@ -60,7 +60,8 @@ services:
     ports:
       - "8500:8500"
     networks:
-      consul-internal:
+      - server_network
+      - public_network
     volumes:
       - consul-agent-data:/consul/data
     depends_on:
@@ -76,5 +77,5 @@ volumes:
     name: consul-agent-data-{{.Task.Slot}}
 
 networks:
-  consul-internal:
-    driver: overlay
+  server_network:
+  public_network:
