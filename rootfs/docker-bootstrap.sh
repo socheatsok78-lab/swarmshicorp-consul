@@ -42,18 +42,19 @@ fi
 if [[ -n "${HASHICORP_NODE_PROVISIONING}" ]]; then
     HASHICORP_NODE_PROVISIONING_DIR=${HASHICORP_NODE_PROVISIONING_DIR:-"/.swarmshicorp-node-provisioning"}
     HASHICORP_NODE_PROVISIONING_FILE=${HASHICORP_NODE_PROVISIONING_FILE:-"${HASHICORP_NODE_PROVISIONING_DIR}/activate"}
-
     while [ ! -f "$HASHICORP_NODE_PROVISIONING_FILE" ]; do
         entrypoint_log "==> Waiting for node provisioning file '$HASHICORP_NODE_PROVISIONING_FILE' to be created..."
         sleep 1
     done
-
     source "$HASHICORP_NODE_PROVISIONING_FILE" && {
-        entrypoint_log "==> Using \"$HASHICORP_NODE_ADVERTISE_ADDRESS\" as advertise address from node provisioning service..."
-        CONSUL_ADVERTISE="-advertise=$HASHICORP_NODE_ADVERTISE_ADDRESS"
-
-        entrypoint_log "==> Using \"$HASHICORP_NODE_ADVERTISE_WAN_ADDRESS\" as advertise-wan address from node provisioning service..."
-        CONSUL_ADVERTISE_WAN="-advertise-wan=$HASHICORP_NODE_ADVERTISE_WAN_ADDRESS"
+        if [[ -n "${HASHICORP_NODE_ADVERTISE_ADDRESS}" ]]; then
+            entrypoint_log "==> Using \"$HASHICORP_NODE_ADVERTISE_ADDRESS\" as advertise address from node provisioning service..."
+            CONSUL_ADVERTISE="-advertise=$HASHICORP_NODE_ADVERTISE_ADDRESS"
+        fi
+        if [[ -n "${HASHICORP_NODE_ADVERTISE_WAN_ADDRESS}" ]]; then
+            entrypoint_log "==> Using \"$HASHICORP_NODE_ADVERTISE_WAN_ADDRESS\" as advertise-wan address from node provisioning service..."
+            CONSUL_ADVERTISE_WAN="-advertise-wan=$HASHICORP_NODE_ADVERTISE_WAN_ADDRESS"
+        fi
     }
 fi
 
