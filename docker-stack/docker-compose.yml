@@ -21,6 +21,10 @@ services:
   node_provisioning:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-node-provisioning:main
     environment:
+      - HASHICORP_NODE_BIND_INTERFACE
+      - HASHICORP_NODE_CLIENT_INTERFACE
+      - HASHICORP_NODE_ADVERTISE_INTERFACE=${HASHICORP_NODE_ADVERTISE_INTERFACE:-eth0}
+      - HASHICORP_NODE_ADVERTISE_WAN_INTERFACE=${HASHICORP_NODE_ADVERTISE_WAN_INTERFACE:-eth0}
       - HASHICORP_NODE_PROVISIONING_DIR=/.swarmshicorp-node-provisioning
     networks:
       - host_network
@@ -36,8 +40,9 @@ services:
       # ===============================
       # DO NOT CHANGE THIS VALUES BELOW
       # ===============================
-      - CONSUL_RETRY_JOIN=tasks.server
+      - HASHICORP_NODE_PROVISIONING=true
       - CONSUL_DOCKERSWARM_AUTOPILOT=true
+      - CONSUL_RETRY_JOIN=tasks.server
       # Internal Docker Swarm configurations
       - DOCKERSWARM_SERVICE_ID={{.Service.ID}}
       - DOCKERSWARM_SERVICE_NAME={{.Service.Name}}
@@ -49,6 +54,11 @@ services:
       - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
     command: agent -server
     hostname: server-{{.Node.ID}}.svc.cluster.local
+    ports:
+      - published: 8500
+        target: 8500
+        protocol: tcp
+        mode: host
     networks:
       - server_network
     volumes:
@@ -67,8 +77,9 @@ services:
       # ===============================
       # DO NOT CHANGE THIS VALUES BELOW
       # ===============================
-      - CONSUL_RETRY_JOIN=tasks.server
+      - HASHICORP_NODE_PROVISIONING=true
       - CONSUL_DOCKERSWARM_AUTOPILOT=true
+      - CONSUL_RETRY_JOIN=tasks.server
       # Internal Docker Swarm configurations
       - DOCKERSWARM_SERVICE_ID={{.Service.ID}}
       - DOCKERSWARM_SERVICE_NAME={{.Service.Name}}
