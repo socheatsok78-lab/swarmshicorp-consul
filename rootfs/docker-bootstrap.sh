@@ -49,8 +49,11 @@ if [[ -n "${HASHICORP_NODE_PROVISIONING}" ]]; then
     done
 
     source "$HASHICORP_NODE_PROVISIONING_FILE" && {
-        export CONSUL_ADVERTISE_ADDRESS=$HASHICORP_NODE_ADVERTISE_ADDRESS
-        export CONSUL_ADVERTISE_WAN_ADDRESS=$HASHICORP_NODE_ADVERTISE_WAN_ADDRESS
+        entrypoint_log "==> Using \"$HASHICORP_NODE_ADVERTISE_ADDRESS\" as advertise address from node provisioning service..."
+        CONSUL_ADVERTISE="-advertise=$HASHICORP_NODE_ADVERTISE_ADDRESS"
+
+        entrypoint_log "==> Using \"$HASHICORP_NODE_ADVERTISE_WAN_ADDRESS\" as advertise-wan address from node provisioning service..."
+        CONSUL_ADVERTISE_WAN="-advertise-wan=$HASHICORP_NODE_ADVERTISE_WAN_ADDRESS"
     }
 fi
 
@@ -106,10 +109,10 @@ if [[ -z "$CONSUL_ADVERTISE" ]]; then
             echo "Could not find IP for interface '$CONSUL_ADVERTISE_INTERFACE', exiting"
             exit 1
         fi
-    fi
 
-    CONSUL_ADVERTISE="-advertise=$CONSUL_ADVERTISE_ADDRESS"
-    entrypoint_log "==> Found address '$CONSUL_ADVERTISE_ADDRESS' for interface '$CONSUL_ADVERTISE_INTERFACE', setting advertise option..."
+        CONSUL_ADVERTISE="-advertise=$CONSUL_ADVERTISE_ADDRESS"
+        entrypoint_log "==> Found address '$CONSUL_ADVERTISE_ADDRESS' for interface '$CONSUL_ADVERTISE_INTERFACE', setting advertise option..."
+    fi
 fi
 # The advertise WAN address is used to change the address that we advertise to server nodes joining through the WAN.
 if [[ -z "$CONSUL_ADVERTISE_WAN" ]]; then
@@ -119,10 +122,10 @@ if [[ -z "$CONSUL_ADVERTISE_WAN" ]]; then
             echo "Could not find IP for interface '$CONSUL_ADVERTISE_WAN_INTERFACE', exiting"
             exit 1
         fi
-    fi
 
-    CONSUL_ADVERTISE_WAN="-advertise-wan=$CONSUL_ADVERTISE_WAN_ADDRESS"
-    entrypoint_log "==> Found address '$CONSUL_ADVERTISE_WAN_ADDRESS' for interface '$CONSUL_ADVERTISE_WAN_INTERFACE', setting advertise-wan option..."
+        CONSUL_ADVERTISE_WAN="-advertise-wan=$CONSUL_ADVERTISE_WAN_ADDRESS"
+        entrypoint_log "==> Found address '$CONSUL_ADVERTISE_WAN_ADDRESS' for interface '$CONSUL_ADVERTISE_WAN_INTERFACE', setting advertise-wan option..."
+    fi
 fi
 
 # Datacenter Options
