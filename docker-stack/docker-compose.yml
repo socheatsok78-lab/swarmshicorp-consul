@@ -21,15 +21,12 @@ services:
   node_provisioning:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-node-provisioning:main
     environment:
-      - HASHICORP_NODE_BIND_INTERFACE
-      - HASHICORP_NODE_CLIENT_INTERFACE
-      - HASHICORP_NODE_ADVERTISE_INTERFACE=${HASHICORP_NODE_ADVERTISE_INTERFACE:-eth0}
-      - HASHICORP_NODE_ADVERTISE_WAN_INTERFACE=${HASHICORP_NODE_ADVERTISE_WAN_INTERFACE:-eth0}
-      - HASHICORP_NODE_PROVISIONING_DIR=/.swarmshicorp-node-provisioning
+      - HASHICORP_NODE_ADVERTISE_INTERFACE
+      - HASHICORP_NODE_ADVERTISE_WAN_INTERFACE
     networks:
       - host_network
     volumes:
-      - node_provisioning_data:/.swarmshicorp-node-provisioning
+      - consul-node-provisioning:/.swarmshicorp-node-provisioning
     deploy:
       mode: global-job
 
@@ -63,7 +60,7 @@ services:
       - server_network
     volumes:
       - consul-server-data:/consul/data
-      - node_provisioning_data:/.swarmshicorp-node-provisioning
+      - consul-node-provisioning:/.swarmshicorp-node-provisioning
     deploy:
       <<: *x-deploy-policy
       mode: global
@@ -101,7 +98,7 @@ services:
       - agent_network
     volumes:
       - consul-agent-data:/consul/data
-      - node_provisioning_data:/.swarmshicorp-node-provisioning
+      - consul-node-provisioning:/.swarmshicorp-node-provisioning
     depends_on:
       - server
     deploy:
@@ -112,7 +109,7 @@ services:
           - node.role == worker
 
 volumes:
-  node_provisioning_data:
+  consul-node-provisioning:
   consul-server-data:
   consul-agent-data:
 
