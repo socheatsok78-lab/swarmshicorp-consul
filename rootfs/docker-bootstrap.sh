@@ -106,10 +106,10 @@ if [[ -z "$CONSUL_ADVERTISE" ]]; then
             echo "Could not find IP for interface '$CONSUL_ADVERTISE_INTERFACE', exiting"
             exit 1
         fi
-
-        CONSUL_ADVERTISE="-advertise=$CONSUL_ADVERTISE_ADDRESS"
-        entrypoint_log "==> Found address '$CONSUL_ADVERTISE_ADDRESS' for interface '$CONSUL_ADVERTISE_INTERFACE', setting advertise option..."
     fi
+
+    CONSUL_ADVERTISE="-advertise=$CONSUL_ADVERTISE_ADDRESS"
+    entrypoint_log "==> Found address '$CONSUL_ADVERTISE_ADDRESS' for interface '$CONSUL_ADVERTISE_INTERFACE', setting advertise option..."
 fi
 # The advertise WAN address is used to change the address that we advertise to server nodes joining through the WAN.
 if [[ -z "$CONSUL_ADVERTISE_WAN" ]]; then
@@ -119,10 +119,10 @@ if [[ -z "$CONSUL_ADVERTISE_WAN" ]]; then
             echo "Could not find IP for interface '$CONSUL_ADVERTISE_WAN_INTERFACE', exiting"
             exit 1
         fi
-
-        CONSUL_ADVERTISE_WAN="-advertise-wan=$CONSUL_ADVERTISE_WAN_ADDRESS"
-        entrypoint_log "==> Found address '$CONSUL_ADVERTISE_WAN_ADDRESS' for interface '$CONSUL_ADVERTISE_WAN_INTERFACE', setting advertise-wan option..."
     fi
+
+    CONSUL_ADVERTISE_WAN="-advertise-wan=$CONSUL_ADVERTISE_WAN_ADDRESS"
+    entrypoint_log "==> Found address '$CONSUL_ADVERTISE_WAN_ADDRESS' for interface '$CONSUL_ADVERTISE_WAN_INTERFACE', setting advertise-wan option..."
 fi
 
 # Datacenter Options
