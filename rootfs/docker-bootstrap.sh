@@ -40,6 +40,8 @@ fi
 
 # Node Provisioning Service
 if [[ -n "${HASHICORP_NODE_PROVISIONING}" ]]; then
+    entrypoint_log "==> Enable Node Provisioning Service for Docker Swarm..."
+
     HASHICORP_NODE_PROVISIONING_DIR=${HASHICORP_NODE_PROVISIONING_DIR:-"/.swarmshicorp-node-provisioning"}
     HASHICORP_NODE_PROVISIONING_FILE=${HASHICORP_NODE_PROVISIONING_FILE:-"${HASHICORP_NODE_PROVISIONING_DIR}/activate"}
     while [ ! -f "$HASHICORP_NODE_PROVISIONING_FILE" ]; do
