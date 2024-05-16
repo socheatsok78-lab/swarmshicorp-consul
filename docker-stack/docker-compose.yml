@@ -17,6 +17,7 @@ x-deploy-policy: &x-deploy-policy
     failure_action: pause
     max_failure_ratio: 0.1
 
+# See https://developer.hashicorp.com/consul/docs/install/ports for more information
 x-consul-ports: &x-consul-ports
   - published: 8300
     target: 8300
@@ -141,9 +142,11 @@ services:
           - node.role == worker
 
 volumes:
-  consul-node-provisioning:
   consul-server-data:
   consul-agent-data:
+
+  # The swarmshicorp-node-provisioning volume
+  consul-node-provisioning:
 
 networks:
   consul_network:
