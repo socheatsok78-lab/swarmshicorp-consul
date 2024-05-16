@@ -22,7 +22,8 @@ services:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-node-provisioning:main
     environment:
       - HASHICORP_NODE_PROVISIONING_DIR=/.swarmshicorp-node-provisioning
-    network_mode: host
+    networks:
+      - host_network
     volumes:
       - node_provisioning_data:/.swarmshicorp-node-provisioning
     deploy:
@@ -31,6 +32,7 @@ services:
   server:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
     environment:
+      - CONSUL_BOOTSTRAP_EXPECT=${CONSUL_BOOTSTRAP_EXPECT:-1}
       # ===============================
       # DO NOT CHANGE THIS VALUES BELOW
       # ===============================
@@ -45,7 +47,7 @@ services:
       - DOCKERSWARM_TASK_NAME={{.Task.Name}}
       - DOCKERSWARM_TASK_SLOT={{.Task.Slot}}
       - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
-    command: agent -server -bootstrap-expect=3
+    command: agent -server
     hostname: server-{{.Node.ID}}.svc.cluster.local
     networks:
       - server_network
