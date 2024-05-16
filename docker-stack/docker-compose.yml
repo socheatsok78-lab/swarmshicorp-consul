@@ -17,6 +17,45 @@ x-deploy-policy: &x-deploy-policy
     failure_action: pause
     max_failure_ratio: 0.1
 
+x-consul-ports: &x-consul-ports
+  - published: 8300
+    target: 8300
+    protocol: tcp
+    mode: host
+  - published: 8301
+    target: 8301
+    protocol: tcp
+    mode: host
+  - published: 8301
+    target: 8301
+    protocol: udp
+    mode: host
+  - published: 8302
+    target: 8302
+    protocol: tcp
+    mode: host
+  - published: 8302
+    target: 8302
+    protocol: udp
+    mode: host
+  - published: 8500
+    target: 8500
+    protocol: tcp
+    mode: host
+  - published: 8503
+    target: 8503
+    protocol: tcp
+    mode: host
+  - published: 8600
+    target: 8600
+    protocol: tcp
+    mode: host
+  - published: 8600
+    target: 8600
+    protocol: udp
+    mode: host
+
+
 services:
   node_provisioning:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-node-provisioning:main
@@ -33,6 +72,7 @@ services:
   server:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
     environment:
+      - CONSUL_ADVERTISE_INTERFACE=eth0
       - CONSUL_BOOTSTRAP_EXPECT=${CONSUL_BOOTSTRAP_EXPECT:-1}
       # ===============================
       # DO NOT CHANGE THIS VALUES BELOW
@@ -51,13 +91,9 @@ services:
       - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
     command: agent -server
     hostname: server-{{.Node.ID}}.svc.cluster.local
-    ports:
-      - published: 8500
-        target: 8500
-        protocol: tcp
-        mode: host
+    ports: *x-consul-ports
     networks:
-      - server_network
+      - consul_network
     volumes:
       - consul-server-data:/consul/data
       - consul-node-provisioning:/.swarmshicorp-node-provisioning
@@ -71,6 +107,7 @@ services:
   agent:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
     environment:
+      - CONSUL_ADVERTISE_INTERFACE=eth0
       # ===============================
       # DO NOT CHANGE THIS VALUES BELOW
       # ===============================
@@ -88,14 +125,9 @@ services:
       - DOCKERSWARM_STACK_NAMESPACE={{ index .Service.Labels "com.docker.stack.namespace"}}
     command: agent -ui
     hostname: agent-{{.Node.ID}}.svc.cluster.local
-    ports:
-      - published: 8500
-        target: 8500
-        protocol: tcp
-        mode: host
+    ports: *x-consul-ports
     networks:
-      - server_network
-      - agent_network
+      - consul_network
     volumes:
       - consul-agent-data:/consul/data
       - consul-node-provisioning:/.swarmshicorp-node-provisioning
@@ -114,8 +146,9 @@ volumes:
   consul-agent-data:
 
 networks:
+  consul_network:
+
+  # The swarmshicorp-node-provisioning requires access to "host" network
   host_network:
     name: host
     external: true
-  server_network:
-  agent_network:
