@@ -18,15 +18,23 @@ x-deploy-policy: &x-deploy-policy
     max_failure_ratio: 0.1
 
 services:
+  node_provisioning:
+    image: ghcr.io/socheatsok78-lab/swarmshicorp-node-provisioning:main
+    environment:
+      - HASHICORP_NODE_PROVISIONING_DIR=/.swarmshicorp-node-provisioning
+    network_mode: host
+    volumes:
+      - node_provisioning_data:/.swarmshicorp-node-provisioning
+    deploy:
+      mode: global-job
+
   server:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
     environment:
-      # Cluster bootstrap configuration
-      - CONSUL_RETRY_JOIN=tasks.server
-      - CONSUL_ADVERTISE_INTERFACE=eth0
       # ===============================
       # DO NOT CHANGE THIS VALUES BELOW
       # ===============================
+      - CONSUL_RETRY_JOIN=tasks.server
       - CONSUL_DOCKERSWARM_AUTOPILOT=true
       # Internal Docker Swarm configurations
       - DOCKERSWARM_SERVICE_ID={{.Service.ID}}
@@ -40,10 +48,10 @@ services:
     command: agent -server -bootstrap-expect=3
     hostname: server-{{.Node.ID}}.svc.cluster.local
     networks:
-      # eth0
       - server_network
     volumes:
       - consul-server-data:/consul/data
+      - node_provisioning_data:/.swarmshicorp-node-provisioning
     deploy:
       <<: *x-deploy-policy
       mode: global
@@ -54,13 +62,10 @@ services:
   agent:
     image: ghcr.io/socheatsok78-lab/swarmshicorp-consul:1.18
     environment:
-      # Cluster bootstrap configuration
-      - CONSUL_RETRY_JOIN=tasks.server
-      - CONSUL_ADVERTISE_INTERFACE=eth1
-      - CONSUL_ADVERTISE_WAN_INTERFACE=eth0
       # ===============================
       # DO NOT CHANGE THIS VALUES BELOW
       # ===============================
+      - CONSUL_RETRY_JOIN=tasks.server
       - CONSUL_DOCKERSWARM_AUTOPILOT=true
       # Internal Docker Swarm configurations
       - DOCKERSWARM_SERVICE_ID={{.Service.ID}}
@@ -79,18 +84,22 @@ services:
         protocol: tcp
         mode: host
     networks:
-      - public_network
       - server_network
-      - host_network
+      - agent_network
     volumes:
       - consul-agent-data:/consul/data
+      - node_provisioning_data:/.swarmshicorp-node-provisioning
     depends_on:
       - server
     deploy:
       <<: *x-deploy-policy
       mode: global
+      placement:
+        constraints:
+          - node.role == worker
 
 volumes:
+  node_provisioning_data:
   consul-server-data:
   consul-agent-data:
 
@@ -98,5 +107,5 @@ networks:
   host_network:
     name: host
     external: true
-  public_network:
   server_network:
+  agent_network:
